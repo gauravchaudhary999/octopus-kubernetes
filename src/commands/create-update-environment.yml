@@ -1,0 +1,102 @@
+description: >
+  Create or update environment in octopus. Requires environment variables
+  for OCTOPUS_HOST and OCTOPUS_APIKEY. We recommend
+  these be saved in a Project (https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project)
+  or in Contexts (https://circleci.com/docs/2.0/contexts).
+
+
+parameters:
+  executor:
+    description: executor to use for this job
+    type: executor
+    default: default
+  
+  checkout:
+    description: >
+      Boolean for whether or not to checkout as a first step. Default is true.
+    type: boolean
+    default: true
+
+  octopus-host:
+    description: >
+      Name of the environment variable which holds octopus host value.
+    type: env_var_name
+    default: OCTOPUS_HOST
+
+  octopus-apikey:
+    description: >
+      Name of the environment variable which holds octopus apikey value.
+    type: env_var_name
+    default: OCTOPUS_APIKEY
+  
+  space-name:
+    description: Name of the space in octopus.
+    type: string
+    default: "Default"
+
+  env-name:
+    description: >
+      environment name.
+    type: string
+
+  env-description:
+    description: >
+      environment description.
+    type: string
+    default: ""
+
+  env-sort-order:
+    description: >
+      environment sort order value.
+    type: integer
+    default: 0
+
+  env-use-guided-failure:
+    type: boolean
+    description: >
+      UseGuidedFailure flag.
+    default: true
+
+  allow-dynamic-infrastructure:
+    description: environment allowDynamicInfrastructure.
+    type: boolean
+    default: true
+
+steps:
+  - when:
+      condition: <<parameters.checkout>>
+      steps:
+        - checkout
+  - install-prerequisite
+  - run:
+      name: Create or update space in octopus
+      command: |
+        SPACE_NAME="<<parameters.space-name>>"
+        ENV_NAME="<<parameters.env-name>>"
+        ENV_DESCRIPTION="<<parameters.env-description>>"
+        ENV_SORT_ORDER=<<parameters.env-sort-order>>
+        ENV_USE_GUIDED_FAILURE=<<parameters.env-use-guided-failure>>
+        ALLOW_DYNAMIC_INFRASTRUCTURE=<<parameters.allow-dynamic-infrastructure>>
+
+        if [ -n "${SPACE_NAME}" ]; then
+          set -- "$@" --spaceName "${SPACE_NAME}"
+        fi  
+        if [ -n "${ENV_NAME}" ]; then
+          set -- "$@" --envName "${ENV_NAME}"
+        fi
+        if [ -n "${ENV_DESCRIPTION}" ]; then
+          set -- "$@" --envDescription "${ENV_DESCRIPTION}"
+        fi
+        if [ -n "${ENV_SORT_ORDER}" ]; then
+          set -- "$@" --envSortOrderArr ${ENV_SORT_ORDER}
+        fi
+        if [ "${ENV_USE_GUIDED_FAILURE}" == "true" ]; then
+          set -- "$@" --envUseGuidedFailureArr
+        fi
+        if [ "${ALLOW_DYNAMIC_INFRASTRUCTURE}" == "true" ]; then
+          set -- "$@" --allowDynamicInfrastructureArr
+
+        export "<<parameters.octopus-host>>"="$<<parameters.octopus-host>>"
+        export "<<parameters.octopus-apikey>>"="$<<parameters.octopus-apikey>>"
+
+        $GOPATH/bin/k8socopus --cmd createOrUpdateSpace "$@"
