@@ -1,0 +1,24 @@
+description: |
+  Create an environment in octopus.
+
+usage:
+  version: 2.1
+
+  orbs:
+    octopus-kubernetes: utils/octopus-kubernetes@dev:first
+
+  workflows:
+    deployment:
+      jobs:
+        - octopus-kubernetes/configure-environment:
+            space-name: "Orb Name"
+            env-name: "dev,test,prod"
+            cluster-url: "dev-cluster-url,test-cluster-url,prod-cluster,url,"
+            lifecycle-name: "sample_lifecycle"
+            lifecycle-phases-order: "dev,test,prod"
+            lifecycle-automatic-targets: "dev"
+            lifecycle-optional-targets: "dev,test,prod"
+            feed-name: "sample-chart-museum"
+            feed-url: "chart museum url"
+            action-template-name: "helm-template-name,kong-template-name"
+            action-template-type: "Helm, Kong"

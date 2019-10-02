@@ -1,0 +1,10 @@
+description: >
+  CircleCI's executor for golang:
+  https://circleci.com/docs/2.0/executor-types/#using-machine
+parameters:
+  image:
+    type: string
+    default: circleci/golang:1.12
+
+machine:
+  image: <<parameters.image>>

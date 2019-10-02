@@ -1,0 +1,5 @@
+version: 2.1
+
+description: >
+  Create octopus resources through pipleline.
+  See this orb's source: https://github.com/gauravchaudhary999/octopus-kubernetes

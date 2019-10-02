@@ -1,0 +1,8 @@
+description: |
+  Install go client - k8s-octopus
+
+steps:
+  - run:
+      name: Install prerequisite
+      command: |
+        go get github.com/gauravchaudhary999/k8s-octopus/k8socopus
