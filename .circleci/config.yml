@@ -1,0 +1,20 @@
+version: 2.1
+
+orbs:
+  orb-tools: circleci/orb-tools@8.20.0
+
+workflows:
+  lint-pack_validate_deploy-dev:
+    jobs:
+      - orb-tools/lint
+
+      - orb-tools/pack:
+          requires: [orb-tools/lint]
+
+      - orb-tools/publish-dev:
+          context: orb-publishing
+          orb-name: utils/octopus-kubernetes
+          requires: [orb-tools/pack]
+
+
+

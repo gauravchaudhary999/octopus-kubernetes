@@ -5,12 +5,12 @@ usage:
   version: 2.1
 
   orbs:
-    octopus-kubernetes: utils/octopus-kubernetes@dev:first
+    octopus-kubernetes: utils/octopus-kubernetes@dev:alpha
 
   workflows:
-    deployment:
+    setup-octopus-environment:
       jobs:
-        - octopus-kubernetes/configure-environment:
+        - octopus-kubernetes/setup-octopus-environment:
             space-name: "Orb Name"
             env-name: "dev,test,prod"
             cluster-url: "dev-cluster-url,test-cluster-url,prod-cluster,url,"

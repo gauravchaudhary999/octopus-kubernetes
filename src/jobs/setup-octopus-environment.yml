@@ -1,0 +1,363 @@
+description: >
+  Setup the full environment in octopus required for deploying a Helm based Project. Requires environment variables
+  for OCTOPUS_HOST and OCTOPUS_APIKEY. We recommend
+  these be saved in a Project (https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project)
+  or in Contexts (https://circleci.com/docs/2.0/contexts).
+
+executor: <<parameters.executor>>
+
+parameters:
+  executor:
+    description: executor to use for this job
+    type: executor
+    default: circleci/golang:1.13
+  
+  checkout:
+    description: >
+      Boolean for whether or not to checkout as a first step. Default is true.
+    type: boolean
+    default: true
+
+  space-name:
+    description: Name of the space in octopus.
+    type: string
+    default: "Default"
+
+  octopus-host:
+    description: >
+      Name of the environment variable which holds octopus host value.
+    type: env_var_name
+    default: OCTOPUS_HOST
+
+  octopus-apikey:
+    description: >
+      Name of the environment variable which holds octopus apikey value.
+    type: env_var_name
+    default: OCTOPUS_APIKEY
+
+  space-description:
+    description: Octopus space description
+    type: string
+    default: ""
+
+  is-default:
+    type: boolean
+    description: IsDefault
+    default: false
+
+  task-queue-stopped:
+    type: boolean
+    description: TaskQueueStopped variable
+    default: false
+
+  space-managers-team-members:
+    type: string
+    description: Comma separated list of space Managers Team Members
+    default: "teams-managers"
+
+  space-managers-teams:
+    type: string
+    description: A comma-separated string containing list of space managers teams
+    default: "teams-managers"
+
+  env-name:
+    description: >
+      A comma-separated string containing list of environment name.
+    type: string
+
+  env-description:
+    description: >
+      A comma-separated string containing list of environment description .
+    type: string
+    default: ""
+
+  env-sort-order:
+    description: >
+      A comma-separated string containing list of environment sort order value.
+    type: string
+    default: ""
+
+  env-use-guided-failure:
+    type: string
+    description: >
+      A comma-separated string containing list of environment UseGuidedFailure.
+    default: ""
+
+  allow-dynamic-infrastructure:
+    description: A comma-separated string containing list of environment allowDynamicInfrastructure.
+    type: string
+    default: ""
+
+  account-name:
+    description: A comma-separated string containing list of account name.
+    type: string
+    default: ""
+
+  account-description:
+    description: A comma-separated string containing list of account description.
+    type: string
+    default: ""
+
+  account-type:
+    description: A comma-separated string containing list of account type.
+    type: string
+    default: ""
+
+  account-token:
+    description: A comma-separated string containing list of Environment Variable Name for account Token.
+    type: string
+
+  machine-name:
+    description: A comma-separated string containing list of machine name.
+    type: string
+    default: ""
+
+  machine-role:
+    description: A comma-separated string containing list of machine role.
+    type: string
+    default: ""
+
+  tenanted-deployment-participation:
+    description: A comma-separated string containing list of machine tenantedDeploymentParticipation.
+    type: string
+    default: ""
+
+  mac-communication-style:
+    description: A comma-separated string containing list of machine CommunicationStyle.
+    type: string
+    default: ""
+
+  cluster-url:
+    description: A comma-separated string containing list of machine cluster url.
+    type: string
+
+  authentication-type:
+    description: A comma-separated string containing list of machine AuthenticationType.
+    type: string
+    default: ""
+
+  skip-tls-verification:
+    description: A comma-separated string containing list of machine SkipTlsVerification.
+    type: string
+    default: ""
+
+  action-template-name:
+    description: A comma-separated string containing list of action template name.
+    type: string
+
+  action-template-description:
+    description: A comma-separated string containing list of action template description.
+    type: string
+    default: ""
+
+  action-template-type:
+    description: A comma-separated string containing list of action template type.
+    type: string
+
+  lifecycle-name:
+    description: A lifecycle name.
+    type: string
+  
+  lifecycle-description:
+    description: A lifecycle description.
+    type: string
+    default: ""
+
+  lifecycle-automatic-targets:
+    description: A comma separated list of environment in a lifecycle in which application deploy automatically.
+    type: string
+
+  lifecycle-optional-targets:
+    description: A comma separated list of environment in a lifecycle in which application can deploy optionally.
+    type: string
+
+  lifecycle-phases-order:
+    description: A comma separated list of environment in order of lifecycle execution.
+    type: string
+
+  feed-name:
+    description: Name of the feed
+    type: string
+
+  feed-type:
+    description: Feed Type
+    type: string
+    default: ""
+
+  feed-url:
+    description: Feed Url
+    type: string
+
+  feed-username:
+    description: Feed Username
+    type: string
+
+  feed-password:
+    description: Name of the environment variable hodling the value of feed password.
+    type: env_var_name
+    default: "FEED_PASSWORD"
+  
+
+
+steps:
+  - when:
+      condition: <<parameters.checkout>>
+      steps:
+        - checkout
+  - install-prerequisite
+  - run:
+      name: Configure Octopus Environment
+      command: |
+
+        SPACE_NAME="<<parameters.space-name>>"
+        SPACE_DESCRIPTION="<<parameters.space-description>>"
+        IS_DEFAULT="<<parameters.is-default>>"
+        TASK_QUEUE_STOPPED="<<parameters.task-queue-stopped>>"
+        SPACE_MANAGERS_TEAM_MEMBERS="<<parameters.space-managers-team-members>>"
+        SPACE_MANAGERS_TEAMS="<<parameters.space-managers-teams>>"
+
+        ENV_NAME="<<parameters.env-name>>"
+        ENV_DESCRIPTION="<<parameters.env-description>>"
+        ENV_SORT_ORDER="<<parameters.env-sort-order>>"
+        ENV_USE_GUIDED_FAILURE="<<parameters.env-use-guided-failure>>"
+        ALLOW_DYNAMIC_INFRASTRUCTURE="<<parameters.allow-dynamic-infrastructure>>"
+
+        ACCOUNT_NAME="<<parameters.account-name>>"
+        ACCOUNT_DESCRIPTION="<<parameters.account-description>>"
+        ACCOUNT_TYPE="<<parameters.account-type>>"
+        ACCOUNT_TOKEN="<<parameters.account-token>>"
+
+        MACHINE_NAME="<<parameters.machine-name>>"
+        MACHINE_ROLE="<<parameters.machine-role>>"
+        TENANTED_DEPLOYMENT_PARTICIPATION="<<parameters.tenanted-deployment-participation>>"
+        MAC_COMMUNICATION_STYLE="<<parameters.mac-communication-style>>"
+        CLUSTER_URL="<<parameters.cluster-url>>"
+        AUTHENTICATION_TYPE="<<parameters.authentication-type>>"
+        SKIP_TLS_VERIFICATION="<<parameters.skip-tls-verification>>"
+
+        ACTION_TEMPLATE_NAME="<<parameters.action-template-name>>"
+        ACTION_TEMPLATE_DESCRIPTION="<<parameters.action-template-description>>"
+        ACTION_TEMPLATE_TYPE="<<parameters.action-template-type>>"
+
+        LIFECYCLE_NAME="<<parameters.lifecycle-name>>"
+        LIFECYCLE_DESCRIPTION="<<parameters.lifecycle-description>>"
+        LIFECYCLE_AUTOMATIC_TARGETS="<<parameters.lifecycle-automatic-targets>>"
+        LIFECYCLE_OPTIONAL_TARGETS="<<parameters.lifecycle-optional-targets>>"
+        LIFECYCLE_PHASES_ORDER="<<parameters.lifecycle-phases-order>>"
+
+        FEED_NAME="<<parameters.feed-name>>"
+        FEED_URL="<<parameters.feed-url>>"
+        FEED_TYPE="<<parameters.feed-type>>"
+        FEED_USERNAME="<<parameters.feed-username>>"
+        FEED_PASSWORD="<<parameters.feed-password>>"
+
+        if [ -n "${SPACE_NAME}" ]; then
+          set -- "$@" --spaceName "${SPACE_NAME}"
+        fi
+        
+        if [ -n "${SPACE_DESCRIPTION}" ]; then
+          set -- "$@" --spaceDescription "${SPACE_DESCRIPTION}"
+        fi
+        if [ "${IS_DEFAULT}" == "true" ]; then
+          set -- "$@" --isDefault "${IS_DEFAULT}"
+        fi
+        if [ "${TASK_QUEUE_STOPPED}" == "true" ]; then
+          set -- "$@" --taskQueueStopped "${TASK_QUEUE_STOPPED}"
+        fi
+        if [ -n "${SPACE_MANAGERS_TEAM_MEMBERS}" ]; then
+          set -- "$@" --spaceManagersTeamMembers "${SPACE_MANAGERS_TEAM_MEMBERS}"
+        fi
+        if [ -n "${ENV_NAME}" ]; then
+          set -- "$@" --envNameArr "${ENV_NAME}"
+        fi
+        if [ -n "${ENV_DESCRIPTION}" ]; then
+          set -- "$@" --envDescriptionArr "${ENV_DESCRIPTION}"
+        fi
+        if [ -n "${ENV_SORT_ORDER}" ]; then
+          set -- "$@" --envSortOrderArr "${ENV_SORT_ORDER}"
+        fi
+        if [ -n "${ENV_USE_GUIDED_FAILURE}" ]; then
+          set -- "$@" --envUseGuidedFailureArr "${ENV_USE_GUIDED_FAILURE}"
+        fi
+        if [ -n "${ALLOW_DYNAMIC_INFRASTRUCTURE}" ]; then
+          set -- "$@" --allowDynamicInfrastructureArr "${ALLOW_DYNAMIC_INFRASTRUCTURE}"
+        fi
+        if [ -n "${ACCOUNT_NAME}" ]; then
+          set -- "$@" --accNameArr "${ACCOUNT_NAME}"
+        fi
+        if [ -n "${ACCOUNT_DESCRIPTION}" ]; then
+          set -- "$@" --accDescriptionArr "${ACCOUNT_DESCRIPTION}"
+        fi
+        if [ -n "${ACCOUNT_TYPE}" ]; then
+          set -- "$@" --accountTypeArr "${ACCOUNT_TYPE}"
+        fi
+        if [ -n "${ACCOUNT_TOKEN}" ]; then
+          set -- "$@" --tokenNameArr "${ACCOUNT_TOKEN}"
+        fi
+        if [ -n "${MACHINE_NAME}" ]; then
+          set -- "$@" --macNameArr "${MACHINE_NAME}"
+        fi
+        if [ -n "${MACHINE_ROLE}" ]; then
+          set -- "$@" --macRolesArr "${MACHINE_ROLE}"
+        fi
+        if [ -n "${TENANTED_DEPLOYMENT_PARTICIPATION}" ]; then
+          set -- "$@" --tenantedDeploymentParticipationArr "${TENANTED_DEPLOYMENT_PARTICIPATION}"
+        fi
+        if [ -n "${MAC_COMMUNICATION_STYLE}" ]; then
+          set -- "$@" --macCommunicationStyleArr "${MAC_COMMUNICATION_STYLE}"
+        fi
+        if [ -n "${CLUSTER_URL}" ]; then
+          set -- "$@" --clusterUrlArr "${CLUSTER_URL}"
+        fi
+        if [ -n "${AUTHENTICATION_TYPE}" ]; then
+          set -- "$@" --authenticationTypeArr "${AUTHENTICATION_TYPE}"
+        fi
+        if [ -n "${SKIP_TLS_VERIFICATION}" ]; then
+          set -- "$@" --macSkipTlsVerificationArr "${SKIP_TLS_VERIFICATION}"
+        fi
+        if [ -n "${ACTION_TEMPLATE_NAME}" ]; then
+          set -- "$@" --atNameArr "${ACTION_TEMPLATE_NAME}"
+        fi
+        if [ -n "${ACTION_TEMPLATE_DESCRIPTION}" ]; then
+          set -- "$@" --atDescriptionArr "${ACTION_TEMPLATE_DESCRIPTION}"
+        fi
+        if [ -n "${ACTION_TEMPLATE_TYPE}" ]; then
+          set -- "$@" --actionTemplateTypeArr "${ACTION_TEMPLATE_TYPE}"
+        fi
+        if [ -n "${LIFECYCLE_NAME}" ]; then
+          set -- "$@" --lifecycleName "${LIFECYCLE_NAME}"
+        fi
+        if [ -n "${LIFECYCLE_DESCRIPTION}" ]; then
+          set -- "$@" --lifecycleDescription "${LIFECYCLE_DESCRIPTION}"
+        fi
+        if [ -n "${LIFECYCLE_AUTOMATIC_TARGETS}" ]; then
+          set -- "$@" --automaticTargets "${LIFECYCLE_AUTOMATIC_TARGETS}"
+        fi
+        if [ -n "${LIFECYCLE_OPTIONAL_TARGETS}" ]; then
+          set -- "$@" --optionalTargets "${LIFECYCLE_OPTIONAL_TARGETS}"
+        fi
+        if [ -n "${LIFECYCLE_PHASES_ORDER}" ]; then
+          set -- "$@" --phasesOrder "${LIFECYCLE_PHASES_ORDER}"
+        fi
+        if [ -n "${FEED_NAME}" ]; then
+          set -- "$@" --feedName "${FEED_NAME}"
+        fi
+        if [ -n "${FEED_TYPE}" ]; then
+          set -- "$@" --feedType "${FEED_TYPE}"
+        fi
+        if [ -n "${FEED_URL}" ]; then
+          set -- "$@" --feedUri "${FEED_URL}"
+        fi
+        if [ -n "${FEED_USERNAME}" ]; then
+          set -- "$@" --feedUserName "${FEED_USERNAME}"
+        fi
+        if [ -n "${FEED_PASSWORD}" ]; then
+          set -- "$@" --feedPassword "${FEED_PASSWORD}"
+        fi
+        
+        export "<<parameters.feed-password>>"="$<<parameters.feed-password>>"
+        export "<<parameters.account-token>>"="$<<parameters.account-token>>"
+        export "<<parameters.octopus-host>>"="$<<parameters.octopus-host>>"
+        export "<<parameters.octopus-apikey>>"="$<<parameters.octopus-apikey>>"
+
+        $GOPATH/bin/k8socopus --cmd configureOctopus "$@"

@@ -1,0 +1,97 @@
+description: >
+  Create or update space in octopus. Requires environment variables
+  for OCTOPUS_HOST and OCTOPUS_APIKEY. We recommend
+  these be saved in a Project (https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project)
+  or in Contexts (https://circleci.com/docs/2.0/contexts).
+
+
+parameters:
+  executor:
+    description: executor to use for this job
+    type: executor
+    default: default
+  
+  checkout:
+    description: >
+      Boolean for whether or not to checkout as a first step. Default is true.
+    type: boolean
+    default: true
+
+  space-name:
+    description: Name of the space in octopus.
+    type: string
+    default: "Default"
+
+  octopus-host:
+    description: >
+      Name of the environment variable which holds octopus host value.
+    type: env_var_name
+    default: OCTOPUS_HOST
+
+  octopus-apikey:
+    description: >
+      Name of the environment variable which holds octopus apikey value.
+    type: env_var_name
+    default: OCTOPUS_APIKEY
+
+  space-description:
+    description: Octopus space description
+    type: string
+    default: ""
+
+  is-default:
+    type: boolean
+    description: IsDefault
+    default: false
+
+  task-queue-stopped:
+    type: boolean
+    description: TaskQueueStopped variable
+    default: false
+
+  space-managers-team-members:
+    type: string
+    description: Comma separated list of space Managers Team Members
+    default: "teams-managers"
+
+  space-managers-teams:
+    type: string
+    description: A comma-separated string containing list of space managers teams
+    default: "teams-managers"
+
+steps:
+  - when:
+      condition: <<parameters.checkout>>
+      steps:
+        - checkout
+  - install-prerequisite
+  - run:
+      name: Create or update space in octopus
+      command: |
+        SPACE_NAME="<<parameters.space-name>>"
+        SPACE_DESCRIPTION="<<parameters.space-description>>"
+        IS_DEFAULT=<<parameters.is-default>>
+        TASK_QUEUE_STOPPED=<<parameters.task-queue-stopped>>
+        SPACE_MANAGERS_TEAM_MEMBERS="<<parameters.space-managers-team-members>>"
+        SPACE_MANAGERS_TEAMS="<<parameters.space-managers-teams>>"
+
+        if [ -n "${SPACE_NAME}" ]; then
+          set -- "$@" --spaceName "${SPACE_NAME}"
+        fi  
+        if [ -n "${SPACE_DESCRIPTION}" ]; then
+          set -- "$@" --spaceDescription "${SPACE_DESCRIPTION}"
+        fi
+        if [ "${IS_DEFAULT}" == "true" ]; then
+          set -- "$@" --isDefault
+        fi
+        if [ "${TASK_QUEUE_STOPPED}" == "true" ]; then
+          set -- "$@" --taskQueueStopped
+        fi
+        if [ -n "${SPACE_MANAGERS_TEAM_MEMBERS}" ]; then
+          set -- "$@" --spaceManagersTeamMembers "${SPACE_MANAGERS_TEAM_MEMBERS}"
+        fi
+
+        export "<<parameters.octopus-host>>"="$<<parameters.octopus-host>>"
+        export "<<parameters.octopus-apikey>>"="$<<parameters.octopus-apikey>>"
+
+        $GOPATH/bin/k8socopus --cmd createOrUpdateSpace "$@"
