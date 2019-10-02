@@ -1,6 +1,6 @@
 description: >
-  Create or update environment in octopus. Requires environment variables
-  for OCTOPUS_HOST and OCTOPUS_APIKEY. We recommend
+  Create or update account in octopus. Requires environment variables
+  for OCTOPUS_HOST, OCTOPUS_APIKEY and ACCOUNT_TOKEN. We recommend
   these be saved in a Project (https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project)
   or in Contexts (https://circleci.com/docs/2.0/contexts).
 
@@ -39,28 +39,25 @@ parameters:
       environment name.
     type: string
 
-  env-description:
-    description: >
-      environment description.
+  account-name:
+    description: account name.
     type: string
     default: ""
 
-  env-sort-order:
-    description: >
-      environment sort order value.
-    type: integer
-    default: 0
+  account-description:
+    description: account description.
+    type: string
+    default: ""
 
-  env-use-guided-failure:
-    type: boolean
-    description: >
-      UseGuidedFailure flag.
-    default: true
+  account-type:
+    description: account type.
+    type: string
+    default: ""
 
-  allow-dynamic-infrastructure:
-    description: environment allowDynamicInfrastructure.
-    type: boolean
-    default: true
+  account-token:
+    description: Environment Variable Name for account Token.
+    type: env_var_name
+    default: ACCOUNT_TOKEN
 
 steps:
   - when:
@@ -69,14 +66,15 @@ steps:
         - checkout
   - install-prerequisite
   - run:
-      name: Create or update Environment in octopus
+      name: Create or update Account in octopus
       command: |
         SPACE_NAME="<<parameters.space-name>>"
         ENV_NAME="<<parameters.env-name>>"
-        ENV_DESCRIPTION="<<parameters.env-description>>"
-        ENV_SORT_ORDER=<<parameters.env-sort-order>>
-        ENV_USE_GUIDED_FAILURE=<<parameters.env-use-guided-failure>>
-        ALLOW_DYNAMIC_INFRASTRUCTURE=<<parameters.allow-dynamic-infrastructure>>
+        ACCOUNT_NAME="<<parameters.account-name>>"
+        ACCOUNT_DESCRIPTION="<<parameters.account-description>>"
+        ACCOUNT_TYPE="<<parameters.account-type>>"
+        ACCOUNT_TOKEN="<<parameters.account-token>>"
+
 
         if [ -n "${SPACE_NAME}" ]; then
           set -- "$@" --spaceName "${SPACE_NAME}"
@@ -84,20 +82,21 @@ steps:
         if [ -n "${ENV_NAME}" ]; then
           set -- "$@" --envName "${ENV_NAME}"
         fi
-        if [ -n "${ENV_DESCRIPTION}" ]; then
-          set -- "$@" --envDescription "${ENV_DESCRIPTION}"
+        if [ -n "${ACCOUNT_NAME}" ]; then
+          set -- "$@" --accName "${ACCOUNT_NAME}"
         fi
-        if [ -n "${ENV_SORT_ORDER}" ]; then
-          set -- "$@" --envSortOrderArr ${ENV_SORT_ORDER}
+        if [ -n "${ACCOUNT_DESCRIPTION}" ]; then
+          set -- "$@" --accDescription "${ACCOUNT_DESCRIPTION}"
         fi
-        if [ "${ENV_USE_GUIDED_FAILURE}" == "true" ]; then
-          set -- "$@" --envUseGuidedFailureArr
+        if [ -n "${ACCOUNT_TYPE}" ]; then
+          set -- "$@" --accountType "${ACCOUNT_TYPE}"
         fi
-        if [ "${ALLOW_DYNAMIC_INFRASTRUCTURE}" == "true" ]; then
-          set -- "$@" --allowDynamicInfrastructureArr
+        if [ -n "${ACCOUNT_TOKEN}" ]; then
+          set -- "$@" --tokenName "${ACCOUNT_TOKEN}"
         fi
 
         export "<<parameters.octopus-host>>"="$<<parameters.octopus-host>>"
         export "<<parameters.octopus-apikey>>"="$<<parameters.octopus-apikey>>"
+        export "<<parameters.account-token>>"="$<<parameters.account-token>>"
 
-        $GOPATH/bin/k8socopus --cmd createOrUpdateEnvironment "$@"
+        $GOPATH/bin/k8socopus --cmd createOrUpdateAccount "$@"
