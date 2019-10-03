@@ -217,4 +217,4 @@ steps:
         export "<<parameters.octopus-apikey>>"="$<<parameters.octopus-apikey>>"
         export "<<parameters.account-token>>"="$<<parameters.account-token>>"
 
-        $GOPATH/bin/k8socopus --cmd configureEnvironment "$@"
+        $HOME/.go_workspace/bin/k8socopus --cmd configureEnvironment "$@"

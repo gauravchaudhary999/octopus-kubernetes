@@ -369,4 +369,4 @@ steps:
         export "<<parameters.octopus-host>>"="$<<parameters.octopus-host>>"
         export "<<parameters.octopus-apikey>>"="$<<parameters.octopus-apikey>>"
 
-        $GOPATH/bin/k8socopus --cmd configureOctopus "$@"
+        $HOME/.go_workspace/bin/k8socopus --cmd configureOctopus "$@"

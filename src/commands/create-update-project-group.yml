@@ -50,7 +50,7 @@ steps:
         - checkout
   - install-prerequisite
   - run:
-      name: Create or update space in octopus
+      name: Create or update project group in octopus
       command: |
         SPACE_NAME="<<parameters.space-name>>"
         PROJECT_GROUP_NAME="<<parameters.project-group-name>>"

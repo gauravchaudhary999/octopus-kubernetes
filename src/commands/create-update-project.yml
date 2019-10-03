@@ -65,7 +65,7 @@ steps:
         - checkout
   - install-prerequisite
   - run:
-      name: Create or update space in octopus
+      name: Create or update project in octopus
       command: |
         SPACE_NAME="<<parameters.space-name>>"
         PROJECT_NAME="<<parameters.project-name>>"

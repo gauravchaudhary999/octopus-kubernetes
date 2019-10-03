@@ -1,5 +1,5 @@
 description: >
-  Create or update feed in octopus. Requires environment variables
+  Create or update action template in octopus. Requires environment variables
   for OCTOPUS_HOST and OCTOPUS_APIKEY. We recommend
   these be saved in a Project (https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project)
   or in Contexts (https://circleci.com/docs/2.0/contexts).
@@ -34,27 +34,13 @@ parameters:
     type: env_var_name
     default: OCTOPUS_APIKEY
 
-  feed-name:
-    description: Name of the feed
+  project-name:
+    description: Name of the project.
     type: string
 
-  feed-type:
-    description: Feed Type
+  action-template-name:
+    description: A comma separated list of action template name.
     type: string
-    default: ""
-
-  feed-url:
-    description: Feed Url
-    type: string
-
-  feed-username:
-    description: Feed Username
-    type: string
-
-  feed-password:
-    description: Name of the environment variable hodling the value of feed password.
-    type: env_var_name
-    default: "FEED_PASSWORD"
 
 steps:
   - when:
@@ -63,37 +49,23 @@ steps:
         - checkout
   - install-prerequisite
   - run:
-      name: Create or update feed in octopus
+      name: Update deployment process of a project in octopus
       command: |
         SPACE_NAME="<<parameters.space-name>>"
-        FEED_NAME="<<parameters.feed-name>>"
-        FEED_URL="<<parameters.feed-url>>"
-        FEED_TYPE="<<parameters.feed-type>>"
-        FEED_USERNAME="<<parameters.feed-username>>"
-        FEED_PASSWORD_PARAM="<<parameters.feed-password>>"
-
+        PROJECT_NAME="<<parameters.project-name>>"
+        ACTION_TEMPLATE_NAME="<<parameters.action-template-name>>"
 
         if [ -n "${SPACE_NAME}" ]; then
           set -- "$@" --spaceName "${SPACE_NAME}"
         fi
-        if [ -n "${FEED_NAME}" ]; then
-          set -- "$@" --feedName "${FEED_NAME}"
+        if [ -n "${PROJECT_NAME}" ]; then
+          set -- "$@" --projectName "${PROJECT_NAME}"
         fi
-        if [ -n "${FEED_TYPE}" ]; then
-          set -- "$@" --feedType "${FEED_TYPE}"
-        fi
-        if [ -n "${FEED_URL}" ]; then
-          set -- "$@" --feedUri "${FEED_URL}"
-        fi
-        if [ -n "${FEED_USERNAME}" ]; then
-          set -- "$@" --feedUserName "${FEED_USERNAME}"
-        fi
-        if [ -n "${FEED_PASSWORD_PARAM}" ]; then
-          set -- "$@" --feedPassword "${FEED_PASSWORD_PARAM}"
+        if [ -n "${ACTION_TEMPLATE_NAME}" ]; then
+          set -- "$@" --atNameArr "${ACTION_TEMPLATE_NAME}"
         fi
 
         export "<<parameters.octopus-host>>"="$<<parameters.octopus-host>>"
         export "<<parameters.octopus-apikey>>"="$<<parameters.octopus-apikey>>"
-        export "<<parameters.feed-password>>"="$<<parameters.feed-password>>"
 
-        $GOPATH/bin/k8socopus --cmd createOrUpdateFeed "$@"
+        $GOPATH/bin/k8socopus --cmd updateDeploymentProcess "$@"
