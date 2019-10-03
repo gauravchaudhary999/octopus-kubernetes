@@ -1,5 +1,5 @@
 description: >
-  Update Deployment Process of a project in octopus. Requires environment variables
+  Update variable set of a project in octopus. Requires environment variables
   for OCTOPUS_HOST and OCTOPUS_APIKEY. We recommend
   these be saved in a Project (https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project)
   or in Contexts (https://circleci.com/docs/2.0/contexts).
@@ -38,8 +38,12 @@ parameters:
     description: Name of the project.
     type: string
 
-  action-template-name:
-    description: A comma separated list of action template name.
+  file-path:
+    description: Filepath containing variables.
+    type: string
+
+  image-tag:
+    description: Docker Image tag.
     type: string
 
 steps:
@@ -49,11 +53,12 @@ steps:
         - checkout
   - install-prerequisite
   - run:
-      name: Update deployment process of a project in octopus
+      name: Update variable set of a project in octopus
       command: |
         SPACE_NAME="<<parameters.space-name>>"
         PROJECT_NAME="<<parameters.project-name>>"
-        ACTION_TEMPLATE_NAME="<<parameters.action-template-name>>"
+        FILE_PATH="<<parameters.file-path>>"
+        IMAGE_TAG="<<parameters.image-tag>>"
 
         if [ -n "${SPACE_NAME}" ]; then
           set -- "$@" --spaceName "${SPACE_NAME}"
@@ -61,11 +66,14 @@ steps:
         if [ -n "${PROJECT_NAME}" ]; then
           set -- "$@" --projectName "${PROJECT_NAME}"
         fi
-        if [ -n "${ACTION_TEMPLATE_NAME}" ]; then
-          set -- "$@" --atNameArr "${ACTION_TEMPLATE_NAME}"
+        if [ -n "${FILE_PATH}" ]; then
+          set -- "$@" --filepath "${FILE_PATH}"
+        fi
+        if [ -n "${IMAGE_TAG}" ]; then
+          set -- "$@" --imageTag "${IMAGE_TAG}"
         fi
 
         export "<<parameters.octopus-host>>"="$<<parameters.octopus-host>>"
         export "<<parameters.octopus-apikey>>"="$<<parameters.octopus-apikey>>"
 
-        $GOPATH/bin/k8socopus --cmd updateDeploymentProcess "$@"
+        $GOPATH/bin/k8socopus --cmd updateVariableSet "$@"

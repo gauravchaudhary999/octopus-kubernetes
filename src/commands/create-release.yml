@@ -1,5 +1,5 @@
 description: >
-  Update Deployment Process of a project in octopus. Requires environment variables
+  Create Release of a project in octopus. Requires environment variables
   for OCTOPUS_HOST and OCTOPUS_APIKEY. We recommend
   these be saved in a Project (https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project)
   or in Contexts (https://circleci.com/docs/2.0/contexts).
@@ -38,8 +38,20 @@ parameters:
     description: Name of the project.
     type: string
 
-  action-template-name:
-    description: A comma separated list of action template name.
+  service-chart-version:
+    description: Chart Version.
+    type: string
+
+  helm-client-version:
+    description: Helm Cient Version.
+    type: string
+
+  service-package-version:
+    description: Service Version.
+    type: string
+
+  api-gateway-tool-version:
+    description: Api Gateway tool version.
     type: string
 
 steps:
@@ -49,11 +61,15 @@ steps:
         - checkout
   - install-prerequisite
   - run:
-      name: Update deployment process of a project in octopus
+      name: Create release of a project in octopus
       command: |
         SPACE_NAME="<<parameters.space-name>>"
         PROJECT_NAME="<<parameters.project-name>>"
-        ACTION_TEMPLATE_NAME="<<parameters.action-template-name>>"
+        SERVICE_CHART_VERSION="<<parameters.service-chart-version>>"
+        HELM_CLIENT_VERSION="<<parameters.helm-client-version>>"
+        SERVICE_PACKAGE_VERSION="<<parameters.service-package-version>>"
+        API_GATEWAY_TOOL_VERSION="<<parameters.api-gateway-tool-version>>"
+
 
         if [ -n "${SPACE_NAME}" ]; then
           set -- "$@" --spaceName "${SPACE_NAME}"
@@ -61,11 +77,20 @@ steps:
         if [ -n "${PROJECT_NAME}" ]; then
           set -- "$@" --projectName "${PROJECT_NAME}"
         fi
-        if [ -n "${ACTION_TEMPLATE_NAME}" ]; then
-          set -- "$@" --atNameArr "${ACTION_TEMPLATE_NAME}"
+        if [ -n "${SERVICE_CHART_VERSION}" ]; then
+          set -- "$@" --serviceChartVersion "${SERVICE_CHART_VERSION}"
+        fi
+        if [ -n "${HELM_CLIENT_VERSION}" ]; then
+          set -- "$@" --helmClientVersion "${HELM_CLIENT_VERSION}"
+        fi
+        if [ -n "${SERVICE_PACKAGE_VERSION}" ]; then
+          set -- "$@" --servicePackageVersion "${SERVICE_PACKAGE_VERSION}"
+        fi
+        if [ -n "${API_GATEWAY_TOOL_VERSION}" ]; then
+          set -- "$@" --apiGatewayToolVersion "${API_GATEWAY_TOOL_VERSION}"
         fi
 
         export "<<parameters.octopus-host>>"="$<<parameters.octopus-host>>"
         export "<<parameters.octopus-apikey>>"="$<<parameters.octopus-apikey>>"
 
-        $GOPATH/bin/k8socopus --cmd updateDeploymentProcess "$@"
+        $GOPATH/bin/k8socopus --cmd createRelease "$@"
