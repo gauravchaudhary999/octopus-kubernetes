@@ -1,0 +1,73 @@
+description: >
+  Create or update project group in octopus. Requires environment variables
+  for OCTOPUS_HOST and OCTOPUS_APIKEY. We recommend
+  these be saved in a Project (https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project)
+  or in Contexts (https://circleci.com/docs/2.0/contexts).
+
+
+parameters:
+  executor:
+    description: executor to use for this job
+    type: executor
+    default: default
+  
+  checkout:
+    description: >
+      Boolean for whether or not to checkout as a first step. Default is true.
+    type: boolean
+    default: true
+
+  space-name:
+    description: Name of the space in octopus.
+    type: string
+    default: "Default"
+
+  octopus-host:
+    description: >
+      Name of the environment variable which holds octopus host value.
+    type: env_var_name
+    default: OCTOPUS_HOST
+
+  octopus-apikey:
+    description: >
+      Name of the environment variable which holds octopus apikey value.
+    type: env_var_name
+    default: OCTOPUS_APIKEY
+
+  project-group-name:
+    description: Name of the project group.
+    type: string
+
+  project-group-description:
+    description: Project group description.
+    type: string
+    default: ""
+  
+steps:
+  - when:
+      condition: <<parameters.checkout>>
+      steps:
+        - checkout
+  - install-prerequisite
+  - run:
+      name: Create or update space in octopus
+      command: |
+        SPACE_NAME="<<parameters.space-name>>"
+        PROJECT_GROUP_NAME="<<parameters.project-group-name>>"
+        PROJECT_GROUP_DESCRIPTION="<<parameters.project-group-description>>"
+
+
+        if [ -n "${SPACE_NAME}" ]; then
+          set -- "$@" --spaceName "${SPACE_NAME}"
+        fi
+        if [ -n "${PROJECT_GROUP_NAME}" ]; then
+          set -- "$@" --projectGroupName "${PROJECT_GROUP_NAME}"
+        fi
+        if [ -n "${PROJECT_GROUP_DESCRIPTION}" ]; then
+          set -- "$@" --projectGroupDescription "${PROJECT_GROUP_DESCRIPTION}"
+        fi
+
+        export "<<parameters.octopus-host>>"="$<<parameters.octopus-host>>"
+        export "<<parameters.octopus-apikey>>"="$<<parameters.octopus-apikey>>"
+
+        $GOPATH/bin/k8socopus --cmd createOrUpdateProjectGroup "$@"
