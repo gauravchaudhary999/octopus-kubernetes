@@ -40,7 +40,7 @@ parameters:
     type: string
 
   account-name:
-    description: account name.
+    description: account name, if not passed then account name will be same as env name.
     type: string
     default: ""
 
@@ -73,7 +73,7 @@ steps:
         ACCOUNT_NAME="<<parameters.account-name>>"
         ACCOUNT_DESCRIPTION="<<parameters.account-description>>"
         ACCOUNT_TYPE="<<parameters.account-type>>"
-        ACCOUNT_TOKEN="<<parameters.account-token>>"
+        ACCOUNT_TOKEN_PARAM="<<parameters.account-token>>"
 
 
         if [ -n "${SPACE_NAME}" ]; then
@@ -91,8 +91,8 @@ steps:
         if [ -n "${ACCOUNT_TYPE}" ]; then
           set -- "$@" --accountType "${ACCOUNT_TYPE}"
         fi
-        if [ -n "${ACCOUNT_TOKEN}" ]; then
-          set -- "$@" --tokenName "${ACCOUNT_TOKEN}"
+        if [ -n "${ACCOUNT_TOKEN_PARAM}" ]; then
+          set -- "$@" --tokenName "${ACCOUNT_TOKEN_PARAM}"
         fi
 
         export "<<parameters.octopus-host>>"="$<<parameters.octopus-host>>"

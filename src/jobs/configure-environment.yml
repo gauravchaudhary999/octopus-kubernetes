@@ -1,0 +1,217 @@
+description: >
+  Configure the environment in octopus, which includes env, account and machine. Requires environment variables
+  for OCTOPUS_HOST, OCTOPUS_APIKEY and ACCOUNT_TOKEN. We recommend
+  these be saved in a Project (https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project)
+  or in Contexts (https://circleci.com/docs/2.0/contexts).
+
+executor: <<parameters.executor>>
+
+parameters:
+  executor:
+    description: executor to use for this job
+    type: executor
+    default: default
+  
+  checkout:
+    description: >
+      Boolean for whether or not to checkout as a first step. Default is true.
+    type: boolean
+    default: true
+
+  space-name:
+    description: Name of the space in octopus.
+    type: string
+    default: "Default"
+
+  octopus-host:
+    description: >
+      Name of the environment variable which holds octopus host value.
+    type: env_var_name
+    default: OCTOPUS_HOST
+
+  octopus-apikey:
+    description: >
+      Name of the environment variable which holds octopus apikey value.
+    type: env_var_name
+    default: OCTOPUS_APIKEY
+
+  space-name:
+    description: Name of the space in octopus.
+    type: string
+    default: "Default"
+
+  env-name:
+    description: >
+      environment name.
+    type: string
+
+  env-description:
+    description: >
+      environment description.
+    type: string
+    default: ""
+
+  env-sort-order:
+    description: >
+      environment sort order value.
+    type: integer
+    default: 0
+
+  env-use-guided-failure:
+    type: boolean
+    description: >
+      UseGuidedFailure flag.
+    default: true
+
+  allow-dynamic-infrastructure:
+    description: environment allowDynamicInfrastructure.
+    type: boolean
+    default: true
+  
+  machine-name:
+    description: machine name, if not passed then machine name will same as env_name.
+    type: string
+    default: ""
+
+  machine-role:
+    description: A comma-separated string containing list of role.
+    type: string
+    default: ""
+
+  tenanted-deployment-participation:
+    description: tenantedDeploymentParticipation.
+    type: string
+    default: ""
+
+  mac-communication-style:
+    description: Machine CommunicationStyle.
+    type: string
+    default: ""
+
+  cluster-url:
+    description: Machine cluster url.
+    type: string
+
+  authentication-type:
+    description: Machine AuthenticationType.
+    type: string
+    default: ""
+
+  skip-tls-verification:
+    description: Machine SkipTlsVerification.
+    type: boolean
+    default: true
+
+  account-name:
+    description: account name, if not passed then account name will be same as env name.
+    type: string
+    default: ""
+
+  account-description:
+    description: account description.
+    type: string
+    default: ""
+
+  account-type:
+    description: account type.
+    type: string
+    default: ""
+
+  account-token:
+    description: Environment Variable Name for account Token.
+    type: env_var_name
+    default: ACCOUNT_TOKEN
+
+steps:
+  - when:
+      condition: <<parameters.checkout>>
+      steps:
+        - checkout
+  - run:
+      name: Install go
+      command: |
+        sudo add-apt-repository ppa:longsleep/golang-backports
+        sudo apt-get update
+        sudo apt-get install golang-go
+  - install-prerequisite
+  - run:
+      name: Configure Environment (ENvironment, Account and Machine)
+      command: |
+
+        SPACE_NAME="<<parameters.space-name>>"
+        ENV_NAME="<<parameters.env-name>>"
+        ENV_DESCRIPTION="<<parameters.env-description>>"
+        ENV_SORT_ORDER=<<parameters.env-sort-order>>
+        ENV_USE_GUIDED_FAILURE=<<parameters.env-use-guided-failure>>
+        ALLOW_DYNAMIC_INFRASTRUCTURE=<<parameters.allow-dynamic-infrastructure>>
+
+        ACCOUNT_NAME="<<parameters.account-name>>"
+        ACCOUNT_DESCRIPTION="<<parameters.account-description>>"
+        ACCOUNT_TYPE="<<parameters.account-type>>"
+        ACCOUNT_TOKEN_PARAM="<<parameters.account-token>>"
+
+        MACHINE_NAME="<<parameters.machine-name>>"
+        MACHINE_ROLE="<<parameters.machine-role>>"
+        TENANTED_DEPLOYMENT_PARTICIPATION="<<parameters.tenanted-deployment-participation>>"
+        MAC_COMMUNICATION_STYLE="<<parameters.mac-communication-style>>"
+        CLUSTER_URL="<<parameters.cluster-url>>"
+        AUTHENTICATION_TYPE="<<parameters.authentication-type>>"
+        SKIP_TLS_VERIFICATION="<<parameters.skip-tls-verification>>"
+        
+        if [ -n "${SPACE_NAME}" ]; then
+          set -- "$@" --spaceName "${SPACE_NAME}"
+        fi  
+        if [ -n "${ENV_NAME}" ]; then
+          set -- "$@" --envName "${ENV_NAME}"
+        fi
+        if [ -n "${ENV_DESCRIPTION}" ]; then
+          set -- "$@" --envDescription "${ENV_DESCRIPTION}"
+        fi
+        if [ -n "${ENV_SORT_ORDER}" ]; then
+          set -- "$@" --envSortOrder ${ENV_SORT_ORDER}
+        fi
+        if [ "${ENV_USE_GUIDED_FAILURE}" == "true" ]; then
+          set -- "$@" --envUseGuidedFailure
+        fi
+        if [ "${ALLOW_DYNAMIC_INFRASTRUCTURE}" == "true" ]; then
+          set -- "$@" --allowDynamicInfrastructure
+        fi
+        if [ -n "${ACCOUNT_NAME}" ]; then
+          set -- "$@" --accName "${ACCOUNT_NAME}"
+        fi
+        if [ -n "${ACCOUNT_DESCRIPTION}" ]; then
+          set -- "$@" --accDescription "${ACCOUNT_DESCRIPTION}"
+        fi
+        if [ -n "${ACCOUNT_TYPE}" ]; then
+          set -- "$@" --accountType "${ACCOUNT_TYPE}"
+        fi
+        if [ -n "${ACCOUNT_TOKEN_PARAM}" ]; then
+          set -- "$@" --tokenName "${ACCOUNT_TOKEN_PARAM}"
+        fi
+        if [ -n "${MACHINE_NAME}" ]; then
+          set -- "$@" --macName "${MACHINE_NAME}"
+        fi
+        if [ -n "${MACHINE_ROLE}" ]; then
+          set -- "$@" --macRoles "${MACHINE_ROLE}"
+        fi
+        if [ -n "${TENANTED_DEPLOYMENT_PARTICIPATION}" ]; then
+          set -- "$@" --tenantedDeploymentParticipation "${TENANTED_DEPLOYMENT_PARTICIPATION}"
+        fi
+        if [ -n "${MAC_COMMUNICATION_STYLE}" ]; then
+          set -- "$@" --macCommunicationStyle "${MAC_COMMUNICATION_STYLE}"
+        fi
+        if [ -n "${CLUSTER_URL}" ]; then
+          set -- "$@" --clusterUrl "${CLUSTER_URL}"
+        fi
+        if [ -n "${AUTHENTICATION_TYPE}" ]; then
+          set -- "$@" --authenticationType "${AUTHENTICATION_TYPE}"
+        fi
+        if [ "${SKIP_TLS_VERIFICATION}" == "true" ]; then
+          set -- "$@" --macSkipTlsVerification
+        fi
+        
+        export "<<parameters.octopus-host>>"="$<<parameters.octopus-host>>"
+        export "<<parameters.octopus-apikey>>"="$<<parameters.octopus-apikey>>"
+        export "<<parameters.account-token>>"="$<<parameters.account-token>>"
+
+        $GOPATH/bin/k8socopus --cmd configureEnvironment "$@"
