@@ -130,9 +130,8 @@ steps:
   - run:
       name: Install go
       command: |
-        sudo add-apt-repository ppa:longsleep/golang-backports
-        sudo apt-get update
-        sudo apt-get install golang-go
+        curl -sSL "https://dl.google.com/go/go1.13.linux-amd64.tar.gz" | sudo tar -xz -C /usr/local/
+            echo "export PATH=$PATH:/usr/local/go/bin" >> $BASH_ENV
   - install-prerequisite
   - run:
       name: Configure Environment (ENvironment, Account and Machine)
@@ -209,7 +208,7 @@ steps:
         if [ "${SKIP_TLS_VERIFICATION}" == "true" ]; then
           set -- "$@" --macSkipTlsVerification
         fi
-        
+
         export "<<parameters.octopus-host>>"="$<<parameters.octopus-host>>"
         export "<<parameters.octopus-apikey>>"="$<<parameters.octopus-apikey>>"
         export "<<parameters.account-token>>"="$<<parameters.account-token>>"
