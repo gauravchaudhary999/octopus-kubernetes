@@ -130,8 +130,12 @@ steps:
   - run:
       name: Install go
       command: |
+        sudo apt-get remove golang-go
+        sudo apt-get remove --auto-remove golang-go
         curl -sSL "https://dl.google.com/go/go1.13.1.linux-amd64.tar.gz" | sudo tar -xz -C /usr/local/
-            echo "export PATH=$PATH:/usr/local/go/bin" >> $BASH_ENV
+        echo "export PATH=$PATH:/usr/local/go/bin" >> $BASH_ENV
+        echo "export GOPATH=$HOME/go" >> $BASH_ENV
+        echo "export PATH=$PATH:$GOROOT/bin:$GOPATH/bin" >> $BASH_ENV
   - install-prerequisite
   - run:
       name: Configure Environment (ENvironment, Account and Machine)

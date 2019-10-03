@@ -1,0 +1,80 @@
+description: >
+  Create or update action template in octopus. Requires environment variables
+  for OCTOPUS_HOST and OCTOPUS_APIKEY. We recommend
+  these be saved in a Project (https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project)
+  or in Contexts (https://circleci.com/docs/2.0/contexts).
+
+
+parameters:
+  executor:
+    description: executor to use for this job
+    type: executor
+    default: default
+  
+  checkout:
+    description: >
+      Boolean for whether or not to checkout as a first step. Default is true.
+    type: boolean
+    default: true
+
+  space-name:
+    description: Name of the space in octopus.
+    type: string
+    default: "Default"
+
+  octopus-host:
+    description: >
+      Name of the environment variable which holds octopus host value.
+    type: env_var_name
+    default: OCTOPUS_HOST
+
+  octopus-apikey:
+    description: >
+      Name of the environment variable which holds octopus apikey value.
+    type: env_var_name
+    default: OCTOPUS_APIKEY
+
+  action-template-name:
+    description: A  action template name.
+    type: string
+
+  action-template-description:
+    description: A action template description.
+    type: string
+    default: ""
+
+  action-template-type:
+    description: A action template type.
+    type: string
+
+steps:
+  - when:
+      condition: <<parameters.checkout>>
+      steps:
+        - checkout
+  - install-prerequisite
+  - run:
+      name: Create or update Action template in octopus
+      command: |
+        SPACE_NAME="<<parameters.space-name>>"
+        ACTION_TEMPLATE_NAME="<<parameters.action-template-name>>"
+        ACTION_TEMPLATE_DESCRIPTION="<<parameters.action-template-description>>"
+        ACTION_TEMPLATE_TYPE="<<parameters.action-template-type>>"
+
+        if [ -n "${SPACE_NAME}" ]; then
+          set -- "$@" --spaceName "${SPACE_NAME}"
+        fi
+        if [ -n "${ACTION_TEMPLATE_NAME}" ]; then
+          set -- "$@" --atName "${ACTION_TEMPLATE_NAME}"
+        fi
+        if [ -n "${ACTION_TEMPLATE_DESCRIPTION}" ]; then
+          set -- "$@" --atDescription "${ACTION_TEMPLATE_DESCRIPTION}"
+        fi
+        if [ -n "${ACTION_TEMPLATE_TYPE}" ]; then
+          set -- "$@" --actionTemplateType "${ACTION_TEMPLATE_TYPE}"
+        fi
+
+        export "<<parameters.octopus-host>>"="$<<parameters.octopus-host>>"
+        export "<<parameters.octopus-apikey>>"="$<<parameters.octopus-apikey>>"
+
+        $GOPATH/bin/k8socopus --cmd createOrUpdateActionTemplate "$@"
